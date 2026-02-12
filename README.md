@@ -39,48 +39,52 @@ java-app/
 
 ---
 
-## Phase 1 — Droplet Creation
-
+## Step 1 
 - Created Ubuntu 22.04 Droplet on DigitalOcean
 - Selected region and size suitable for Java workloads
 - Added SSH key during creation
 
-📸 screenshots/01-droplet-created.png
+![Droplet Creation](screenshots/01-droplet-created.png)
+
+## Step 2
+- Logged in using SSH as root for initial configuration
+
+  - Root Login (Initial Access)
+  - ssh root@209.38.238.74
+
+![Secure SSH Access](screenshots/02-ssh-root-login.png)
+
+## Step 3
+- Created a dedicated application user
+- Added user to sudoers group
+
+  - adduser ali
+  - usermod -aG sudo ali
+
+![Created Non-Root User](screenshots/03-create-user-ali.png)
+
+## Step 4 
+- Copied SSH keys from root to non-root user
+  
+  - rsync --archive --chown=ali:ali ~/.ssh /home/ali
+
+📸 screenshots/04-copy-ssh-keys.png
+![Copy SSH Keys to Non-Root User](screenshots/04-copy-ssh-keys.png)
+
+## Step 5
+- Edited SSH configuration to improve security
+- Disabled root login
+- Enforced key-based authentication
+
+  - sudo nano /etc/ssh/sshd_config
+  - sudo systemctl restart ssh
+
+![SSH Hardening](screenshots/05-ssh-hardened.png)
+
+
 
 ---
 
-## Phase 2 — Secure SSH Access
-
--  Root Login (Initial Access)
--  ssh root@209.38.238.74
-
-📸 screenshots/02-ssh-root-login.png
-
-
-## Create Non-Root User
--  adduser ali
--  usermod -aG sudo ali
-
-📸 screenshots/03-create-user-ali.png
-
-
-## Copy SSH Keys to Non-Root User
--  rsync --archive --chown=ali:ali ~/.ssh /home/ali
-
-📸 screenshots/04-copy-ssh-keys.png
-
-## SSH Hardening
-
-### Edited SSH configuration:
--  sudo nano /etc/ssh/sshd_config
-
-### Applied:
-
-- Disabled root login
-- Enforced key-based authentication
--  **sudo systemctl restart ssh**
-
-📸 screenshots/05-ssh-hardened.png
 
 
 
