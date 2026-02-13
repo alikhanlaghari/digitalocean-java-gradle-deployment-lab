@@ -2,24 +2,24 @@
 
 ## Overview
 
-This lab demonstrates how to securely deploy and operate a Java Spring Boot application on a cloud server using **DigitalOcean**, following real-world **Application Manager / DevOps** practices.
+This lab demonstrates how to securely deploy, operate, and validate a Java Spring Boot application on a cloud server using **DigitalOcean**, following real-world **Application Manager / DevOps** practices.
 
-The focus is not just running an application, but:
+The focus is not just “running an app”, but:
 - Hardening the server
-- Enforcing secure access
-- Building and packaging a Java application
+- Enforcing secure access (SSH keys, non-root user)
+- Packaging a Java application with **Gradle**
 - Deploying and validating the application in production-like conditions
 
 ---
 
 ## Architecture Summary
 
-- **Client:** Developer workstation (Windows + Git Bash + IntelliJ IDEA)
+- **Client:** Windows workstation (Git Bash + IntelliJ IDEA)
 - **Cloud Provider:** DigitalOcean
-- **Compute:** Ubuntu 22.04 Droplet
+- **Server:** Ubuntu 22.04 Droplet
 - **Runtime:** OpenJDK 17
-- **Build Tool:** Gradle
-- **Application:** Spring Boot (embedded Tomcat, port 8080)
+- **Build Tool:** Gradle (Gradle Wrapper)
+- **Application:** Spring Boot (embedded Tomcat, port **8080**)
 - **Access:** SSH key-based authentication
 - **Security:** UFW firewall, non-root user, SSH hardening
 
@@ -27,27 +27,30 @@ The focus is not just running an application, but:
 
 ## Project Structure
 
-The project follows a standard Gradle-based Java application structure. The source code resides under src/main/java/com/example, containing the main Spring Boot entry point App.java and the REST controller HelloController.java. Build artifacts are generated in the build/libs directory, including the executable java-app-1.0-SNAPSHOT.jar and the corresponding -plain JAR. The project is managed using Gradle, with build.gradle defining dependencies and build logic, gradlew providing the Gradle wrapper for consistent builds across environments, and settings.gradle handling project-level configuration.
+In this lab, the Java application follows a standard Gradle project layout:
+
+java-app/ → contains application source code under `src/main/java/com/example/` (App.java + HelloController.java), and build outputs under `build/libs/` (executable JAR and `-plain` JAR). The build is driven by `build.gradle`, with `gradlew` ensuring consistent builds across environments.
+
 
 ---
 ## Deployment Phases
 
-###  Phase 1-7: Server Hardening
-###  Phase 8-12: Application Prep & Transfer
-### Phase 13-16: Execution & Validation
-###  Phase 17-18: Application Shutdown & Cleanup
+
+- **Phase 1–7:** Server hardening (SSH + firewall + non-root user)
+- **Phase 8–12:** Application build & transfer
+- **Phase 13–16:** Run, validate, and confirm access
 
 ---
 
 ## Phase 1 — Droplet Creation
-- Created Ubuntu 22.04 Droplet on DigitalOcean
-- Selected region and size suitable for Java workloads
+- Created an Ubuntu 22.04 Droplet on DigitalOcean
+- Selected region + size appropriate for a small Java workload
 - Added SSH key during creation
 
 ![Droplet Creation](screenshots/01-droplet-created.png)
 
 ## Phase 2 — Initial Root SSH Login
-- Logged in using SSH as root for initial configuration
+- Initial login as root (first-time setup only):
 
   - Root Login (Initial Access)
   - ssh root@209.38.238.74
@@ -55,8 +58,7 @@ The project follows a standard Gradle-based Java application structure. The sour
 ![Secure SSH Access](screenshots/02-ssh-root-login.png)
 
 ## Phase 3 — Create Non-Root User
-- Created a dedicated application user
-- Added user to sudoers group
+- Create a dedicated user and grant sudo:
 
   - adduser ali
   - usermod -aG sudo ali
@@ -64,19 +66,21 @@ The project follows a standard Gradle-based Java application structure. The sour
 ![Created Non-Root User](screenshots/03-create-user-ali.png)
 
 ## Phase 4 — Copy SSH Keys to Non-Root User
-- Copied SSH keys from root to non-root user
+- Copy authorized SSH keys from root to the new user:
   
   - rsync --archive --chown=ali:ali ~/.ssh /home/ali
 
 ![Copy SSH Keys to Non-Root User](screenshots/04-copy-ssh-keys.png)
 
 ## Phase 5 — SSH Hardening
-- Edited SSH configuration to improve security
-- Disabled root login
-- Enforced key-based authentication
+- Edit SSH config and enforce secure settings:
 
   - sudo nano /etc/ssh/sshd_config
   - sudo systemctl restart ssh
+
+- Hardening goals:
+  -  Disable root login
+  -  Enforce SSH key authentication
 
 ![SSH Hardening](screenshots/05-ssh-hardened.png)
 
@@ -114,6 +118,11 @@ The project follows a standard Gradle-based Java application structure. The sour
 
   - ./gradlew clean build
 
+- **Artifacts expected:**
+  
+  -  build/libs/java-app-1.0-SNAPSHOT.jar
+  -  build/libs/java-app-1.0-SNAPSHOT-plain.jar
+
 ![Build Java Application Locally](screenshots/10-gradle-build-success.png)
 
 ## Phase 10 — Install Java on Droplet
@@ -148,9 +157,9 @@ The project follows a standard Gradle-based Java application structure. The sour
 ![Verify Artifact on Server](screenshots/14-jar-visible-on-server(droplet).png)
 
 ## Phase 14 — Start Application
-- Started Spring Boot application using nohup
-- Redirected logs to file
+- Start the Spring Boot app in background
 
+  - cd ~/apps/java-app
   - nohup java -jar java-app-1.0-SNAPSHOT.jar > app.log 2>&1 &
 
 ![Start Applicationy](screenshots/15-app-started.png)
@@ -165,13 +174,13 @@ The project follows a standard Gradle-based Java application structure. The sour
 ![Application Running (nohup)](screenshots/18-app-running-nohup.png)
 
 ## Phase 16 — Application Access & Validation
-- Verified application endpoints via browser
-  - /
-  - /health
+- Verified application endpoint (Local on droplet)
+  - curl -i http://localhost:8080/
+  - curl -i http://localhost:8080/health
     
 - Validated via browser:
-  - http://<droplet-ip>:8080/
-  - http://<droplet-ip>:8080/health
+  - http://209.38.238.74:8080/
+  - http://209.38.238.74:8080/health
 
 ![Browser Home Endpoint](screenshots/23-browser-home.png)
 ![Browser Health Endpoint](screenshots/24-browser-health.png)
@@ -198,6 +207,38 @@ The project follows a standard Gradle-based Java application structure. The sour
 
 ---
 
+## Operational Learning Outcomes (Public Sector & Enterprise)
+
+- **Stable and predictable operations:**  
+  Demonstrated the ability to provision, deploy, and operate a cloud-based application in a controlled and repeatable manner, aligned with public-sector expectations for system stability and reliability.
+
+- **Security and access control:**  
+  Applied the principle of least privilege through non-root user access, SSH key-based authentication, and firewall configuration, reflecting common security requirements in municipal and enterprise environments.
+
+- **Operational readiness and verification:**  
+  Verified system behavior using process inspection, port monitoring, log review, and HTTP endpoint testing to ensure services function correctly before and after deployment.
+
+- **Clear separation of responsibilities:**  
+  Maintained a structured separation between development, deployment, and runtime operations, supporting maintainability, incident handling, and operational handover.
+
+- **Documentation and traceability:**  
+  Produced step-by-step documentation with commands and screenshots, suitable for audits, onboarding, and long-term system ownership.
+
+- **Alignment with enterprise IT practices:**  
+  The lab reflects workflows commonly used in municipalities and larger organizations, where controlled change, validation, and documentation are essential.
+
+---
+
+## Outcome Summary
+
+- Secure Ubuntu server provisioned and hardened  
+- Java application built and packaged in a reproducible manner using Gradle  
+- Application deployed and operated as a non-root user  
+- Network access restricted and explicitly controlled via firewall rules  
+- Application functionality validated through multiple verification steps  
+- System shut down cleanly to ensure cost control and responsible resource usage  
+
+---
 
 
 
