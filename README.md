@@ -96,9 +96,52 @@ java-app/
 - Verified SSH login using non-root user
 
   - sudo reboot
-  - ssh ali@<209.38.238.74>
+  - ssh ali@209.38.238.74
 
 ![Reboot and Access Verification](screenshots/07-post-reboot-login.png)
+
+## Step 8
+- Verified sudo access for non-root user
+
+  - sudo whoami
+
+![Grant Sudo Access Validation](screenshots/08-ali-added-to-sudo.png)(screenshots/09-sudo-working.png)
+
+## Step 9
+- Built Spring Boot application using Gradle Wrapper
+
+  - ./gradlew clean build
+
+![Build Java Application Locally](screenshots/10-gradle-build-success.png)
+
+## Step 10
+- Installed OpenJDK 17
+- Verified Java runtime
+
+  - sudo apt update
+  - sudo apt install -y openjdk-17-jdk
+  - java -version 
+
+![Install Java on Droplet](screenshots/11-java-installed-on-droplet.png)
+
+## Step 11
+- Created a dedicated directory for application deployment
+
+  - mkdir -p ~/apps/java-app
+
+![Create Application Directory](screenshots/12-fix-wrong-directory.png)
+
+## Step 12
+- Copied built JAR file to the Droplet
+
+  - scp build/libs/java-app-1.0-SNAPSHOT.jar ali@<droplet-ip>:~/apps/java-app/
+
+![Transfer Application Artifact](screenshots/13-jar-copied-to-droplet.png)
+
+
+
+
+
 
 ---
 
