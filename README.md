@@ -81,7 +81,24 @@ java-app/
 
 ![SSH Hardening](screenshots/05-ssh-hardened.png)
 
+## Step 6
+- Allowed SSH traffic
+- Enabled firewall protection
 
+  - sudo ufw allow OpenSSH
+  - sudo ufw enable
+  - sudo ufw status  
+
+![Firewall Configuration (UFW)](screenshots/06-ufw-enabled.png)
+
+## Step 7
+- Rebooted server (droplet)
+- Verified SSH login using non-root user
+
+  - sudo reboot
+  - ssh ali@<209.38.238.74>
+
+![Reboot and Access Verification](screenshots/07-post-reboot-login.png)
 
 ---
 
