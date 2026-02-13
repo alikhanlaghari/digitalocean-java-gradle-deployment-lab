@@ -39,14 +39,14 @@ java-app/
 
 ---
 
-## Step 1 
+## Phase 1 — Droplet Creation
 - Created Ubuntu 22.04 Droplet on DigitalOcean
 - Selected region and size suitable for Java workloads
 - Added SSH key during creation
 
 ![Droplet Creation](screenshots/01-droplet-created.png)
 
-## Step 2
+## Phase 2 — Initial Root SSH Login
 - Logged in using SSH as root for initial configuration
 
   - Root Login (Initial Access)
@@ -54,7 +54,7 @@ java-app/
 
 ![Secure SSH Access](screenshots/02-ssh-root-login.png)
 
-## Step 3
+## Phase 3 — Create Non-Root User
 - Created a dedicated application user
 - Added user to sudoers group
 
@@ -63,7 +63,7 @@ java-app/
 
 ![Created Non-Root User](screenshots/03-create-user-ali.png)
 
-## Step 4 
+## Phase 4 — Copy SSH Keys to Non-Root User
 - Copied SSH keys from root to non-root user
   
   - rsync --archive --chown=ali:ali ~/.ssh /home/ali
@@ -71,7 +71,7 @@ java-app/
 📸 screenshots/04-copy-ssh-keys.png
 ![Copy SSH Keys to Non-Root User](screenshots/04-copy-ssh-keys.png)
 
-## Step 5
+## Phase 5 — SSH Hardening
 - Edited SSH configuration to improve security
 - Disabled root login
 - Enforced key-based authentication
@@ -81,7 +81,7 @@ java-app/
 
 ![SSH Hardening](screenshots/05-ssh-hardened.png)
 
-## Step 6
+## Phase 6 — Firewall Configuration (UFW)
 - Allowed SSH traffic
 - Enabled firewall protection
 
@@ -91,7 +91,7 @@ java-app/
 
 ![Firewall Configuration (UFW)](screenshots/06-ufw-enabled.png)
 
-## Step 7
+## Phase 7 — Reboot and Access Verification
 - Rebooted server (droplet)
 - Verified SSH login using non-root user
 
@@ -100,21 +100,24 @@ java-app/
 
 ![Reboot and Access Verification](screenshots/07-post-reboot-login.png)
 
-## Step 8
+---
+
+## Phase 8 — Grant Sudo Access Validation
 - Verified sudo access for non-root user
 
   - sudo whoami
 
-![Grant Sudo Access Validation](screenshots/08-ali-added-to-sudo.png)(screenshots/09-sudo-working.png)
+![Reboot and Access Verification 1](screenshots/08-ali-added-to-sudo.png)
+![Reboot and Access Verification 2](screenshots/09-sudo-working.png)
 
-## Step 9
+## Phase 9 — Build Java Application Locally
 - Built Spring Boot application using Gradle Wrapper
 
   - ./gradlew clean build
 
 ![Build Java Application Locally](screenshots/10-gradle-build-success.png)
 
-## Step 10
+## Phase 10 — Install Java on Droplet
 - Installed OpenJDK 17
 - Verified Java runtime
 
@@ -124,23 +127,49 @@ java-app/
 
 ![Install Java on Droplet](screenshots/11-java-installed-on-droplet.png)
 
-## Step 11
+## Phase 11 — Create Application Directory
 - Created a dedicated directory for application deployment
 
   - mkdir -p ~/apps/java-app
 
 ![Create Application Directory](screenshots/12-fix-wrong-directory.png)
 
-## Step 12
+## Phase 12 — Transfer Application Artifact
 - Copied built JAR file to the Droplet
 
   - scp build/libs/java-app-1.0-SNAPSHOT.jar ali@<droplet-ip>:~/apps/java-app/
 
 ![Transfer Application Artifact](screenshots/13-jar-copied-to-droplet.png)
 
+## Phase 13 — Verify Artifact on Server (Droplet)
+- Confirmed JAR file presence and permissions
 
+  - ls -la ~/apps/java-app
 
+![Verify Artifact on Server](screenshots/14-jar-visible-on-server(droplet).png)
 
+## Phase 14 — Start Application
+- Started Spring Boot application using nohup
+- Redirected logs to file
+
+  - nohup java -jar java-app-1.0-SNAPSHOT.jar > app.log 2>&1 &
+
+![Start Applicationy](screenshots/15-app-started.png)
+
+## Phase 15 — Port and Process Validation
+- Copied built JAR file to the Droplet
+
+  - ss -lntp | grep 8080
+
+![Port and Process Validation](screenshots/16-port-check.png)(screenshots/17-ufw-allow-8080.png)(screenshots/18-app-running-nohup.png)
+
+## Phase 16 — Application Access & Validation
+- Verified application endpoints via browser
+
+  - /
+  - /health
+
+![Application Access & Validation](screenshots/19-browser-8080.png)(screenshots/23-browser-home.png)(screenshots/24-browser-health.png)
 
 
 ---
